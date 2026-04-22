@@ -58,19 +58,23 @@ class VectorStore:
 
     def retrieve(self, query: str, collection_name: str = "travel_guides", top_k: int = 5, filter_meta: dict = None) -> list:
         collection = self.chroma.get_collection(collection_name)
-        query_embedding = self.embed([query])[0].tolist()
-        kwargs = {"query_embeddings": [query_embedding], "n_results": top_k}
-        if filter_meta:
-            kwargs["where"] = filter_meta
-        results = collection.query(**kwargs)
-        docs = []
-        for i, doc in enumerate(results["documents"][0]):
-            docs.append({
-                "text": doc,
-                "metadata": results["metadatas"][0][i],
-                "score": 1 - results["distances"][0][i],
-            })
-        return docs
+        try:
+            query_embedding = self.embed([query])[0].tolist()
+            kwargs = {"query_embeddings": [query_embedding], "n_results": top_k}
+            if filter_meta:
+                kwargs["where"] = filter_meta
+            results = collection.query(**kwargs)
+            docs = []
+            for i, doc in enumerate(results["documents"][0]):
+                docs.append({
+                    "text": doc,
+                    "metadata": results["metadatas"][0][i],
+                    "score": 1 - results["distances"][0][i],
+                })
+            return docs
+        except Exception as e:
+            print(f"Embedding/Retrieval completely failed: {e}")
+            return []
 
 _store = None
 
