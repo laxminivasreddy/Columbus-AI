@@ -13,12 +13,16 @@ class RAGPipeline:
         self.store = get_vector_store()
 
     async def retrieve_and_synthesize(self, query: str, destination: str, top_k: int = 3) -> str:
-        travel_docs = self.store.retrieve(
-            query=f"{destination} {query}",
-            collection_name="travel_guides",
-            top_k=top_k,
-        )
-        if not travel_docs:
+        try:
+            travel_docs = self.store.retrieve(
+                query=f"{destination} {query}",
+                collection_name="travel_guides",
+                top_k=top_k,
+            )
+            if not travel_docs:
+                return "No specific guide data available — using general knowledge."
+        except Exception as e:
+            print(f"Gemini API Embedding Error: {e}")
             return "No specific guide data available — using general knowledge."
         context = "\n\n".join([
             f"[Source: {d['metadata'].get('source', 'guide')} | Relevance: {d['score']:.2f}]\n{d['text']}"
