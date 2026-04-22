@@ -1,0 +1,25 @@
+# Environments
+.env
+.env.*
+venv/
+env/
+ENV/
+backend/venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# MacOS
+.DS_Store
+
+# Databases / Vector Stores
+chroma_db/
+faiss_index/
+*.sqlite3
+
+# IDEs
+.vscode/
+.idea/

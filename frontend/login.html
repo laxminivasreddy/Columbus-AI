@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AI Travel Planner</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Tailwind -->
+    <script src="config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+        <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#0f172a',
+                        'secondary': '#1e293b',
+                        'accent': '#06b6d4',
+                        'accent-dark': '#0891b2',
+                        'gradient-start': '#667eea',
+                        'gradient-end': '#764ba2',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'slide-up': 'slideUp 0.6s ease-out',
+                        'bounce-slow': 'bounce 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(50px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+
+    <!-- Your CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-blue-100 min-h-screen flex items-center justify-center">
+
+    <!-- Login Card -->
+    <div class="glass rounded-3xl p-10 w-full max-w-md shadow-2xl animate-fade-in">
+
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <i class="fas fa-robot text-4xl text-accent mb-3"></i>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-accent to-purple-600 bg-clip-text text-transparent">
+                Welcome Back
+            </h1>
+            <p class="text-gray-600 mt-2">Login to your account</p>
+        </div>
+
+        <!-- Form -->
+        <form id="loginForm" class="space-y-6">
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Email</label>
+                <input type="email" id="email" placeholder="Enter your email"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent">
+            </div>
+
+            <!-- Password -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Password</label>
+                <input type="password" id="password" placeholder="Enter your password"
+                    class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent">
+            </div>
+
+            <!-- Remember + Forgot -->
+            <div class="flex justify-between items-center text-sm">
+                <label class="flex items-center gap-2">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="#" class="text-accent hover:underline">Forgot password?</a>
+            </div>
+
+            <!-- Button -->
+            <button type="submit"
+                class="w-full py-3 bg-gradient-to-r from-accent to-blue-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+                Login
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="text-center my-6 text-gray-500">or</div>
+
+        <!-- Google Login -->
+        <button
+            class="w-full py-3 border border-gray-300 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-50">
+            <i class="fab fa-google text-red-500"></i>
+            Continue with Google
+        </button>
+
+        <!-- Signup -->
+        <p class="text-center mt-6 text-sm text-gray-600">
+            Don't have an account?
+            <a href="signup.html" class="text-accent font-semibold">Sign up</a>
+        </p>
+    </div>
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 right-5 px-6 py-3 rounded-xl shadow-lg transform transition-all duration-300 translate-x-full opacity-0 z-50 text-white font-medium"></div>
+
+<script>
+function showToast(message, isError = false, callback = null) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = `fixed top-5 right-5 px-6 py-3 rounded-xl shadow-lg transform transition-all duration-300 z-50 text-white font-medium ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+    
+    setTimeout(() => toast.classList.remove("translate-x-full", "opacity-0"), 10);
+    
+    setTimeout(() => {
+        toast.classList.add("translate-x-full", "opacity-0");
+        if (callback) setTimeout(callback, 300);
+    }, 2000);
+}
+
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+        return showToast("Please fill all fields", true);
+    }
+
+    try {
+        const res = await fetch(`${CONFIG.API_BASE_URL}/api/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.message === "Login successful") {
+
+            // ✅ Store user in localStorage
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            showToast("Login successful. Welcome back!", false, () => {
+                window.location.href = "index.html";
+            });
+
+        } else {
+            showToast(data.detail || data.message || "Login failed", true);
+        }
+
+    } catch (err) {
+        console.error(err);
+        showToast("Server error", true);
+    }
+});
+</script>
+</body>
+</html>
