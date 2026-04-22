@@ -8,13 +8,16 @@ settings = get_settings()
 
 class GeminiEmbeddingFunction(EmbeddingFunction):
     def __init__(self, api_key: str):
-        self.client = genai.Client(api_key=api_key)
+        self.client = genai.Client(
+            api_key=api_key,
+            http_options={'api_version': 'v1'}
+        )
         
     def __call__(self, input: Documents) -> Embeddings:
         if not input:
             return []
         response = self.client.models.embed_content(
-            model="models/embedding-001",
+            model="text-embedding-004",
             contents=input
         )
         return [emb.values for emb in response.embeddings]
