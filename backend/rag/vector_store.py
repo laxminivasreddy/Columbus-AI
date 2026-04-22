@@ -14,7 +14,7 @@ class GeminiEmbeddingFunction(EmbeddingFunction):
         if not input:
             return []
         response = self.client.models.embed_content(
-            model="text-embedding-004",
+            model="models/embedding-001",
             contents=input
         )
         return [emb.values for emb in response.embeddings]
