@@ -3,6 +3,7 @@ from functools import lru_cache
 
 class Settings(BaseSettings):
     anthropic_api_key: str
+    gemini_api_key: str = ""
     mongodb_url: str = "mongodb://localhost:27017"
     redis_url: str = "redis://localhost:6379"
     weather_api_key: str = ""

@@ -1,13 +1,15 @@
 import chromadb
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from google import genai
 from config import get_settings
 
 settings = get_settings()
 
 class VectorStore:
     def __init__(self):
-        self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
+        if not settings.gemini_api_key:
+            print("WARNING: GEMINI_API_KEY is not set. Embeddings will fail.")
+        self.gemini_client = genai.Client(api_key=settings.gemini_api_key)
         self.chroma = chromadb.PersistentClient(path=settings.chroma_persist_dir)
         self.travel_collection = self.chroma.get_or_create_collection(
             name="travel_guides",
@@ -17,7 +19,15 @@ class VectorStore:
         self.reviews_collection = self.chroma.get_or_create_collection(name="reviews")
 
     def embed(self, texts: list) -> np.ndarray:
-        return self.embedder.encode(texts, normalize_embeddings=True)
+        if not texts:
+            return np.array([])
+        
+        response = self.gemini_client.models.embed_content(
+            model="text-embedding-004",
+            contents=texts
+        )
+        # response.embeddings is a list where each item has .values
+        return np.array([emb.values for emb in response.embeddings])
 
     def upsert_travel_guide(self, doc_id: str, text: str, metadata: dict):
         embedding = self.embed([text])[0].tolist()
