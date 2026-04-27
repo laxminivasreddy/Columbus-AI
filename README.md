@@ -1,3 +1,3 @@
 # Columbus-AI
 AI-Powered Travel Planning System
-Web Site Link - https://columbus-ai.vercel.app/
+WebSite Link - https://columbus-ai.vercel.app/
